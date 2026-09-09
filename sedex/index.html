@@ -404,7 +404,7 @@
                     <a href="mailto:info@maxconsultancy.in"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> info@maxconsultancy.in</a>
                 </div>
             </div>
-            <p class="footer-address">Shop No. 208, Vardhman Grand Market, Sector 3, Dwarka, New Delhi — 110078</p>
+            <p class="footer-address">Habitat Sec 99A, Gurugram, Haryana 122505</p>
             <p>&copy; 2026 Max Consultancy. All rights reserved.</p>
         </div>
     </footer>
@@ -418,7 +418,7 @@
                 <div class="popup-body">
                     <form id="contactForm" onsubmit="submitForm(event)">
                         <div class="form-row"><div class="form-group"><label for="name">Your Name *</label><input type="text" id="name" name="name" required placeholder="Full name"></div><div class="form-group"><label for="company">Company / Factory Name *</label><input type="text" id="company" name="company" required placeholder="Company name"></div></div>
-                        <div class="form-row"><div class="form-group"><label for="phone">Phone *</label><input type="tel" id="phone" name="phone" required placeholder="+91 XXXXX XXXXX"></div><div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" placeholder="you@company.com"></div></div>
+                        <div class="form-row"><div class="form-group"><label for="phone">Phone *</label><input type="tel" id="phone" name="phone" required placeholder="+91 XXXXX XXXXX"></div><div class="form-group"><label for="email">Email *</label><input type="email" id="email" name="email" required placeholder="you@company.com"></div></div>
                         <div class="form-group"><label for="industry">Industry *</label><select id="industry" name="industry" required><option value="" disabled selected>Select your industry</option><option value="Textile & Garments">Textile &amp; Garments</option><option value="IT & Services">IT &amp; Services</option><option value="Automobile">Automobile</option><option value="Trading House">Trading House</option><option value="Pharma / FMCG">Pharma / FMCG</option><option value="Other">Other</option></select></div>
                         <div class="form-group"><label for="message">What do you need help with?</label><textarea id="message" name="message" placeholder="E.g., Buyer has asked for SEDEX, need help with SMETA 4-Pillar audit prep..."></textarea></div>
                         <button type="submit" class="btn-submit" id="submitBtn">Send My Enquiry — Takes 30 Seconds <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
@@ -456,22 +456,43 @@
 
         var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1d6QYAirx9QBjuFG0YFxPIstwUZoWHoE2BB4G3un3qT5b9XizElbzPknRSXDy-F-zxA/exec';
 
+        function getPageSlug() {
+            var path = window.location.pathname.split('/').filter(Boolean);
+            if (path.length > 0) return path[path.length - 1];
+            return 'homepage';
+        }
+
         function submitForm(e) {
             e.preventDefault();
             var btn = document.getElementById('submitBtn');
             var errorEl = document.getElementById('formError');
+
+            var nameVal = document.getElementById('name').value.trim();
+            var companyVal = document.getElementById('company').value.trim();
+            var phoneVal = document.getElementById('phone').value.trim();
+            var industryVal = document.getElementById('industry').value.trim();
+
+            if (!nameVal) { alert('Please enter your name'); return; }
+            if (!companyVal) { alert('Please enter your company name'); return; }
+            if (!phoneVal) { alert('Please enter your phone number'); return; }
+            if (!/^[0-9]{10,15}$/.test(phoneVal.replace(/[\s\-\+]/g, ''))) { alert('Please enter a valid phone number (minimum 10 digits)'); return; }
+            if (!industryVal) { alert('Please select your industry'); return; }
+
+            var emailVal = document.getElementById('email').value.trim();
+            if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) { alert('Please enter a valid email address'); return; }
+
             btn.disabled = true;
             btn.textContent = 'Sending...';
             errorEl.style.display = 'none';
 
             var data = {
-                name: document.getElementById('name').value,
-                company: document.getElementById('company').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value || '',
-                industry: document.getElementById('industry').value,
-                message: document.getElementById('message').value || '',
-                source: 'SEDEX Landing Page',
+                name: nameVal,
+                company: companyVal,
+                phone: phoneVal,
+                email: emailVal,
+                industry: industryVal,
+                message: document.getElementById('message').value.trim(),
+                campaign: getPageSlug(),
                 timestamp: new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})
             };
 
@@ -497,6 +518,24 @@
                 errorEl.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = 'Send My Enquiry — Takes 30 Seconds <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+            });
+
+            // Email notification via formsubmit.co
+            var emailFormData = new FormData();
+            emailFormData.append('name', data.name);
+            emailFormData.append('company', data.company);
+            emailFormData.append('phone', data.phone);
+            emailFormData.append('email', data.email || 'not provided');
+            emailFormData.append('industry', data.industry);
+            emailFormData.append('message', data.message || 'not provided');
+            emailFormData.append('campaign', data.campaign);
+            emailFormData.append('_subject', 'New Lead from ' + data.campaign + ': ' + data.company);
+            emailFormData.append('_template', 'table');
+            emailFormData.append('_captcha', 'false');
+
+            fetch('https://formsubmit.co/ajax/iammdaman123@gmail.com', {
+                method: 'POST',
+                body: emailFormData
             });
         }
 
