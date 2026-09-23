@@ -518,6 +518,8 @@
             .then(function() {
                 document.getElementById('formContent').style.display = 'none';
                 document.getElementById('formSuccess').classList.add('active');
+                                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ 'event': 'form_submit_success' });
                 setTimeout(function() {
                     document.getElementById('formContent').style.display = '';
                     document.getElementById('formSuccess').classList.remove('active');
