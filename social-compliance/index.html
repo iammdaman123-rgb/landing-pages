@@ -653,6 +653,8 @@
             .then(function(){
                 document.getElementById(s.fields).style.display = 'none';
                 document.getElementById(s.success).classList.add('active');
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ "event": "form_submit_success" });
             })
             .catch(function(){
                 errorEl.style.display = 'block';
